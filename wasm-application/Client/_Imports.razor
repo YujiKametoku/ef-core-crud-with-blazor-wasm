@@ -1,0 +1,14 @@
+﻿@using System.Net.Http
+@using System.Net.Http.Json
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Components.Routing
+@using Microsoft.AspNetCore.Components.Web
+@using Microsoft.AspNetCore.Components.WebAssembly.Http
+@using Microsoft.JSInterop
+@using wasm_application.Client
+@using wasm_application.Client.Shared
+
+@*下記2つを追加します。*@
+@using wasmapplication.Shared.Models
+@inject HttpClient Http
+@inject IJSRuntime JS

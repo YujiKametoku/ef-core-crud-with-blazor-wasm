@@ -1,0 +1,104 @@
+﻿@page "/student"
+
+<h1>Student</h1>
+
+@if (editMode)
+{
+    <p>編集</p>
+    <EditForm Model="editStudent" OnValidSubmit="@(async () => { await UpdateStudentAsync(editStudent.Id, editStudent); editMode = false; })">
+        <span>@editStudent.Id</span>
+        <InputText id="editFirstName" placeholder="First Name" @bind-Value="editStudent.FirstName" />
+        <InputText id="editLastName" placeholder="Last Name" @bind-Value="editStudent.LastName" />
+        <InputNumber id="editAge" placeholder="Age" @bind-Value="editStudent.Age" />
+        <button type="submit">更新</button>
+        <button type="button" @onclick="@(() => editMode = false)">取消</button>
+    </EditForm>
+}
+else
+{
+    <p>新規追加</p>
+    <EditForm Model="student" OnValidSubmit="@PostStudentAsync">
+        <InputText id="firstName" placeholder="First Name" @bind-Value="student.FirstName" />
+        <InputText id="lastName" placeholder="Last Name" @bind-Value="student.LastName" />
+        <InputNumber id="age" placeholder="Age" @bind-Value="student.Age" />
+        <button type="submit">登録</button>
+    </EditForm>
+}
+
+<br/>
+
+@if (students == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Age</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var student in students)
+            {
+                <tr>
+                    <td>@student.Id</td>
+                    <td>@student.FirstName</td>
+                    <td>@student.LastName</td>
+                    <td>@student.Age</td>
+                    <td>
+                        <button type="button" @onclick="@(() => { editMode = true; editStudent = student; })">編集</button>
+                        <button type="button" @onclick="@(() => DeleteStudentAsync(student.Id))">削除</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private Student[] students;
+
+    private Student student = new Student();
+    private Student editStudent = new Student();
+
+    private bool editMode = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        students = await GetStudentsAsync();
+    }
+
+    private async Task<Student[]> GetStudentsAsync()
+    {
+        return await Http.GetFromJsonAsync<Student[]>("api/student");
+    }
+
+    private async Task PostStudentAsync()
+    {
+        await Http.PostAsJsonAsync("api/student", student);
+
+        student = new Student();
+
+        students = await GetStudentsAsync();
+    }
+
+    private async Task UpdateStudentAsync(long id, Student student)
+    {
+        await Http.PutAsJsonAsync($"api/student/{id}", student);
+
+        students = await GetStudentsAsync();
+    }
+
+    private async Task DeleteStudentAsync(long id)
+    {
+        await Http.DeleteAsync($"api/student/{id}");
+
+        students = await GetStudentsAsync();
+    }
+}
